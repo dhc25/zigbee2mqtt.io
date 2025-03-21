@@ -25,8 +25,8 @@ function uncapitalizeFirstLetter(string) {
 
 function compositeDocs(composite) {
     const value = `{${composite.features.map((e) => `"${e.property}": VALUE`).join(', ')}}`;
+    const note: string[] = [];
 
-    let note = [];
     for (const feature of composite.features) {
         let ft = '';
         if (feature.type === 'binary') {
@@ -53,8 +53,8 @@ function compositeDocs(composite) {
 }
 
 function getExposeDocs(expose, definition) {
-    const lines = [];
-    const title = [];
+    const lines: string[] = [];
+    const title: string[] = [];
 
     const onWithTimedOff = () => {
         lines.push(``);
@@ -157,7 +157,7 @@ function getExposeDocs(expose, definition) {
             lines.push(`It's not possible to read (\`/get\`) this value.`);
         }
 
-        const on_time = definition.toZigbee.find((t) => t.key.includes('on_time'));
+        const on_time = definition.toZigbee.find((t) => t.key?.includes('on_time'));
         if (on_time && expose.type === 'switch' && state.access & access.SET) {
             onWithTimedOff();
         }
@@ -240,11 +240,11 @@ function getExposeDocs(expose, definition) {
             );
         }
 
-        const on_time = definition.toZigbee.find((t) => t.key.includes('on_time'));
+        const on_time = definition.toZigbee.find((t) => t.key?.includes('on_time'));
         if (on_time) {
             onWithTimedOff();
         }
-        const transition = definition.toZigbee.find((t) => t.key.includes('transition'));
+        const transition = definition.toZigbee.find((t) => t.key?.includes('transition'));
         if (transition) {
             lines.push(``);
             lines.push(`#### Transition`);
@@ -254,8 +254,8 @@ function getExposeDocs(expose, definition) {
             lines.push(`Examples: \`{"brightness":156,"transition":3}\`, \`{"color_temp":241,"transition":1}\`.`);
         }
 
-        const brightnessMove = definition.toZigbee.find((t) => t.key.includes('brightness_move'));
-        const brightnessStep = definition.toZigbee.find((t) => t.key.includes('brightness_step'));
+        const brightnessMove = definition.toZigbee.find((t) => t.key?.includes('brightness_move'));
+        const brightnessStep = definition.toZigbee.find((t) => t.key?.includes('brightness_step'));
         if (brightnessMove && brightnessStep) {
             lines.push(``);
             lines.push(`#### Moving/stepping`);
@@ -362,9 +362,11 @@ function getExposeDocs(expose, definition) {
         if (expose.description) {
             lines.push(expose.description + '.');
         }
-        let txt = {value: '', note: []};
+        let txt: {value: string; note: string[]} = {value: '', note: []};
         if (expose.item_type.type === 'composite') {
             txt = compositeDocs(expose.item_type);
+        } else if (expose.item_type.type === 'enum') {
+            txt['value'] = expose.item_type.values.map((v) => `"${v}"`).join(', ');
         } else if (expose.item_type.type === 'text') {
             // Empty on purpose
         } else {

@@ -57,12 +57,14 @@ Here we can see that the adapter is owned by `root` and accessible from all user
 
 Zigbee2MQTT supports mDNS autodiscovery feature for network Zigbee adapters. If your network Zigbee adapter supports mDNS, you do not need to know the IP address of your network Zigbee adapter, Zigbee2MQTT will detect it and configure. Otherwise, you need to know the network Zigbee adapter's IP address:
 
--   Connect your adapter to your LAN network either over Ethernet or Wi-Fi, depending on your adapter.
--   Go to your router/switch setting and find the list of connected device.
--   Find the IP address and of your Ethernet Zigbee adapter.
--   You also need to know the communication port of your Ethernet Zigbee-Adapter. In most cases (TubeZB, SLZB-06) the default port is `6638`. You can check the port at your Adapter's user manual.
+- Connect your adapter to your LAN network either over Ethernet or Wi-Fi, depending on your adapter.
+- Go to your router/switch setting and find the list of connected device.
+- Find the IP address and of your Ethernet Zigbee adapter.
+- You also need to know the communication port of your Ethernet Zigbee-Adapter. In most cases (TubeZB, SLZB-06) the default port is `6638`. You can check the port at your Adapter's user manual.
 
 ### 2.) Setup and start Zigbee2MQTT
+
+#### 2.1) Configure Docker
 
 It's assumed, that you have a recent version of Docker and Docker Compose installed.
 
@@ -96,27 +98,15 @@ services:
             - /dev/ttyUSB0:/dev/ttyUSB0
 ```
 
+#### 2.2) Configure Zigbee2MQTT
+
 In the next step we'll create a simple [Zigbee2MQTT config file](../configuration/) in `zigbee2mqtt-data/configuration.yaml`.
 
-```yaml
-# Let new devices join our zigbee network
-permit_join: true
-# Docker Compose makes the MQTT-Server available using "mqtt" hostname
-mqtt:
-    base_topic: zigbee2mqtt
-    server: mqtt://mqtt
-# Zigbee Adapter path
-serial:
-    port: /dev/ttyUSB0
-# Enable the Zigbee2MQTT frontend
-frontend:
-    port: 8080
-# Let Zigbee2MQTT generate a new network key on first start
-advanced:
-    network_key: GENERATE
-```
+NOTE: Docker Compose makes the MQTT-Server available using "mqtt" hostname.
 
-For network adapters, `serial` settings should look like this:
+<Configurator mqtt="mqtt://mqtt" serial="/dev/ttyUSB0" portType="Serial" adapter="zstack" />
+
+For network adapters, `serial` > `port` settings should look like this:
 
 ```yaml
 serial:
@@ -133,6 +123,8 @@ serial:
 ```
 
 Where `slzb-06` is the mDNS name of your network Zigbee adapter.
+
+#### 2.3) Start Zigbee2MQTT
 
 We should now have two files in our directory and can start the stack:
 

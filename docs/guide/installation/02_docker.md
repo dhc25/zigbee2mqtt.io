@@ -6,10 +6,10 @@ next: ../configuration/
 
 It is possible to run Zigbee2MQTT in a Docker container using the official [Zigbee2MQTT Docker image](https://hub.docker.com/r/koenkk/zigbee2mqtt/).
 
-This image support the following architectures: `386`, `amd64`, `arm/v6`, `arm/v7`, `arm64`.
+This image support the following architectures: `linux/386`, `linux/amd64`, `linux/arm/v6`, `linux/arm/v7`, `linux/arm64` and `linux/riscv64`.
 Since Zigbee2MQTT images are manifest listed, Docker will auto-detect the architecture and pull the right image.
 
-Start by figuring out the location of your adapter as explained [here](./01_linux.md#determine-location-of-the-adapter-and-checking-user-permissions).
+Start by figuring out the location of your adapter as explained [here](../configuration/adapter-settings.md#determine-location-of-the-adapter).
 
 **IMPORTANT**: Using a Raspberry Pi? Make sure to check [Notes for Raspberry Pi users](#notes-for-raspberry-pi-users).
 
@@ -18,7 +18,7 @@ Start by figuring out the location of your adapter as explained [here](./01_linu
 Navigate to the directory where you will store the Zigbee2MQTT data and execute the following command:
 
 ```bash
-wget https://raw.githubusercontent.com/Koenkk/zigbee2mqtt/master/data/configuration.yaml -P data
+mkdir data && wget https://raw.githubusercontent.com/Koenkk/zigbee2mqtt/master/data/configuration.example.yaml -O data/configuration.yaml
 ```
 
 Now configure the MQTT server and adapter location as explained [here](./01_linux.md#configuring).
@@ -41,13 +41,13 @@ $ docker run \
 
 **Parameters explanation:**
 
--   `--name zigbee2mqtt`: Name of container
--   `--restart=unless-stopped`: Automatically start on boot and restart after a crash
--   `--device=/dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B0018ED3DDF-if00:/dev/ttyACM0`: Location of adapter (e.g. CC2531). The path before the `:` is the path on the host, the path after it is the path that is mapped to inside the container. You should always use the `/dev/serial/by-id/` path on the host.
--   `-v $(pwd)/data:/app/data`: Directory where Zigbee2MQTT stores it configuration (pwd maps to the current working directory)
--   `-v /run/udev:/run/udev:ro`: only required for auto-detecting the port and some adapters like ConBee
--   `-e TZ=Europe/Amsterdam`: Configure the timezone
--   `-p 8080:8080`: port forwarding from inside Docker container to host (for the frontend)
+- `--name zigbee2mqtt`: Name of container
+- `--restart=unless-stopped`: Automatically start on boot and restart after a crash
+- `--device=/dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B0018ED3DDF-if00:/dev/ttyACM0`: Location of adapter (e.g. CC2531). The path before the `:` is the path on the host, the path after it is the path that is mapped to inside the container. You should always use the `/dev/serial/by-id/` path on the host.
+- `-v $(pwd)/data:/app/data`: Directory where Zigbee2MQTT stores it configuration (pwd maps to the current working directory)
+- `-v /run/udev:/run/udev:ro`: required for auto-detecting the adapter
+- `-e TZ=Europe/Amsterdam`: configure the timezone
+- `-p 8080:8080`: port forwarding from inside Docker container to host (for the frontend)
 
 ::: tip
 If you run the MQTT-Server on the same host (localhost) you could use the IP
@@ -92,8 +92,8 @@ $ sudo docker run \
 
 **Parameters explanation:**
 
--   `--user 1001:1001`: Run the Zigbee2MQTT process within the container using the provided UserID and GroupID
--   `--group-add dialout`: Assign the `dialout` group to the user to be able to access the device
+- `--user 1001:1001`: Run the Zigbee2MQTT process within the container using the provided UserID and GroupID
+- `--group-add dialout`: Assign the `dialout` group to the user to be able to access the device
 
 ### Rootless with Podman (>3.2)
 
@@ -110,6 +110,10 @@ $ podman run \
    koenkk/zigbee2mqtt
 ```
 
+::: tip
+With SELinux enabled you may need to append a `:z` suffix to the volume mount: `-v $(pwd)/data:/app/data:z`
+:::
+
 ## Updating
 
 To update to the latest Docker image:
@@ -124,9 +128,9 @@ docker rm -f zigbee2mqtt
 
 The following tags are available:
 
--   Latest release version: `latest`
--   Latest dev version (based on [`dev`](https://github.com/Koenkk/zigbee2mqtt/tree/dev) branch): `latest-dev`
--   Specific release version, e.g: `1.7.0`
+- Latest release version: `latest`
+- Latest dev version (based on [`dev`](https://github.com/Koenkk/zigbee2mqtt/tree/dev) branch): `latest-dev`
+- Specific release version, e.g: `1.7.0`
 
 ## Docker Compose
 
@@ -183,7 +187,7 @@ You can optionally skip `zigbee2mqtt` and it will pull any new images for all co
 
 ## Notes for Raspberry Pi users
 
--   If you are running Raspbian Buster (not Bullseye!) (find out by executing `grep "PRETTY_NAME" /etc/os-release`) you need to install `libseccomp2`, this can be done by executing the following commands:
+- If you are running Raspbian Buster (not Bullseye nor Bookworm!) (find out by executing `grep "PRETTY_NAME" /etc/os-release`) you need to install `libseccomp2`, this can be done by executing the following commands:
 
 ```bash
 sudo apt-key adv --keyserver hkps://keyserver.ubuntu.com:443 --recv-keys 04EE7237B7D453EC 648ACFD622F3D138
@@ -204,8 +208,8 @@ If you do not do this you will get the following error when starting the Zigbee2
 #FailureMessage Object: 0x7eace25c
 ```
 
--   For Raspberry Pi 1 and zero users: there is a bug in Docker which selects the wrong image architecture.
-    Before executing `docker run` pull the correct image with `docker pull koenkk/zigbee2mqtt --platform linux/arm/v6`.
+- For Raspberry Pi 1 and zero users: there is a bug in Docker which selects the wrong image architecture.
+  Before executing `docker run` pull the correct image with `docker pull koenkk/zigbee2mqtt --platform linux/arm/v6`.
 
 ## Docker Stack device mapping
 
@@ -512,7 +516,7 @@ This workaround only works with cgroup v1, which is not enabled on many newer di
 
     In the above example, `proxy_traefik-net` is the network to connect to the mqtt broker. The constraint makes sure Docker deploys only to this (`rpi-3`) node, where the serial adapter is connected to. The volume binding `/mnt/docker-cluster/zigbee2mqtt/data` is the zigbee2mqtt persistent directory, where `configuration.yaml` is saved.
 
-    The zigbee2Zigbee2MQTTmqtt `configuration.yaml` should point to `/dev/zigbee-serial`:
+    The Zigbee2MQTT `configuration.yaml` should point to `/dev/zigbee-serial`:
 
     ```yaml
     [...]

@@ -18,7 +18,7 @@ pageClass: device-page
 | Model | ptvo_counter_2ch  |
 | Vendor  | [Custom devices (DiY)](/supported-devices/#v=Custom%20devices%20(DiY))  |
 | Description | 2 channel counter |
-| Exposes | battery, l3, l5, switch (state), voltage, linkquality |
+| Exposes | battery, l3, l5, switch (state), voltage |
 | Picture | ![Custom devices (DiY) ptvo_counter_2ch](https://www.zigbee2mqtt.io/images/devices/ptvo_counter_2ch.png) |
 
 
@@ -47,19 +47,19 @@ It's not possible to read (`/get`) or write (`/set`) this value.
 The minimal value is `0` and the maximum value is `100`.
 The unit of this value is `%`.
 
-### L3 (enum)
-Counter value. Write zero or positive value to set a counter value. Write a negative value to set a wakeup interval in minutes.
+### L3 (numeric)
+Counter 1 value. Write zero or positive value to set a counter value. Write a negative value to set a wakeup interval in minutes.
 Value can be found in the published state on the `l3` property.
 To read (`/get`) the value publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"l3": ""}`.
 To write (`/set`) a value publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"l3": NEW_VALUE}`.
-The possible values are: `set`.
+The minimal value is `-999999999` and the maximum value is `999999999`.
 
-### L5 (enum)
-Counter value. Write zero or positive value to set a counter value. Write a negative value to set a wakeup interval in minutes.
+### L5 (numeric)
+Counter 2 value. Write zero or positive value to set a counter value. Write a negative value to set a wakeup interval in minutes.
 Value can be found in the published state on the `l5` property.
 To read (`/get`) the value publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"l5": ""}`.
 To write (`/set`) a value publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"l5": NEW_VALUE}`.
-The possible values are: `set`.
+The minimal value is `-999999999` and the maximum value is `999999999`.
 
 ### Switch (l6 endpoint)
 The current state of this switch is in the published state under the `state_l6` property (value is `ON` or `OFF`).
@@ -77,11 +77,4 @@ Voltage of the battery in millivolts.
 Value can be found in the published state on the `voltage` property.
 It's not possible to read (`/get`) or write (`/set`) this value.
 The unit of this value is `mV`.
-
-### Linkquality (numeric)
-Link quality (signal strength).
-Value can be found in the published state on the `linkquality` property.
-It's not possible to read (`/get`) or write (`/set`) this value.
-The minimal value is `0` and the maximum value is `255`.
-The unit of this value is `lqi`.
 
